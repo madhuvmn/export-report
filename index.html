@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reports – Excel Preview & PDF</title>
+  <style>
+  :root{
+    --accent:#2563eb;
+    --accent-soft:#e0edff;
+    --accent-strong:#1d4ed8;
+    --muted:#6b7280;
+    --bg:#e5edff;
+    --card:#ffffff;
+    --danger:#ef4444;
+    --danger-soft:#fee2e2;
+    --input-border:#dbeafe;
+    --unsaved:#fef9c3;
+    --table-header:#e0f2fe;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    background:radial-gradient(circle at top,#eef2ff 0,#e5edff 35%,#dde3ff 100%);
+    color:#111827;
+    padding:14px;
+  }
+
+  .container{ max-width:1100px; margin:0 auto; }
+
+  header{ text-align:center; margin-bottom:14px; }
+  header h1{
+    margin:0;
+    font-size:20px;
+    font-weight:800;
+    background:linear-gradient(120deg,#2563eb,#7c3aed);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+
+  .card{
+    background:linear-gradient(135deg,#ffffff,#f5f7ff);
+    border-radius:14px;
+    padding:16px 14px;
+    box-shadow:0 14px 30px rgba(15,23,42,0.12);
+    margin-bottom:14px;
+    border:1px solid rgba(129,140,248,0.35);
+  }
+
+  .form-area{ display:flex; flex-direction:column; gap:10px; }
+
+  .row-input{
+    display:grid;
+    grid-template-columns:48px 140px 90px 80px 1fr 1fr 1fr 120px;
+    gap:8px;
+    align-items:end;
+    padding:10px;
+    border-radius:10px;
+    background:rgba(239,246,255,0.9);
+    border:1px dashed rgba(191,219,254,0.9);
+    transition:box-shadow .18s ease, transform .18s ease, border-color .18s ease;
+  }
+  .row-input + .row-input{ margin-top:6px; }
+
+  .row-input:hover{
+    box-shadow:0 10px 20px rgba(37,99,235,0.15);
+    border-color:#2563eb;
+    transform:translateY(-1px);
+  }
+
+  .serial-badge{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    color:#111827;
+    font-size:14px;
+    background:var(--accent-soft);
+    border-radius:999px;
+    padding:4px 0;
+  }
+
+  label{
+    font-size:12px;
+    color:var(--muted);
+    display:block;
+    margin-bottom:4px;
+  }
+
+  input[type="number"],
+  input[type="date"],
+  input[type="text"],
+  select{
+    width:100%;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid var(--input-border);
+    background:white;
+    font-size:14px;
+    outline:none;
+    transition:border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+  }
+  input[readonly]{ background:#f3f4ff; }
+
+  input:focus,
+  select:focus{
+    border-color:var(--accent-strong);
+    box-shadow:0 0 0 2px rgba(129,140,248,0.4);
+    background:#ffffff;
+  }
+
+  .field{ display:flex; flex-direction:column; }
+
+  .actions-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    margin-top:8px;
+    flex-wrap:wrap;
+  }
+
+  button{
+    padding:10px 14px;
+    border-radius:999px;
+    border:0;
+    background:var(--accent);
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+    font-size:13px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    box-shadow:0 8px 18px rgba(37,99,235,0.25);
+    transition:background-color .16s ease, transform .12s ease, box-shadow .16s ease, opacity .16s ease;
+  }
+
+  button:hover{
+    background:var(--accent-strong);
+    transform:translateY(-1px);
+    box-shadow:0 12px 24px rgba(37,99,235,0.30);
+  }
+
+  button:active{
+    transform:translateY(0);
+    box-shadow:0 6px 12px rgba(37,99,235,0.25);
+  }
+
+  button.ghost{
+    background:rgba(255,255,255,0.9);
+    border:1px solid #d1d5db;
+    color:#111827;
+    box-shadow:none;
+  }
+
+  button.ghost:hover{
+    background:#f3f4ff;
+    border-color:rgba(129,140,248,0.8);
+    box-shadow:0 4px 10px rgba(148,163,184,0.35);
+  }
+
+  button.warn{
+    background:var(--danger);
+    box-shadow:0 8px 18px rgba(248,113,113,0.4);
+  }
+  button.warn:hover{
+    background:#dc2626;
+    box-shadow:0 10px 20px rgba(239,68,68,0.45);
+  }
+
+  button.small{ padding:8px 12px; font-size:12px; }
+
+  .controls-left{ display:flex; gap:8px; align-items:center; }
+  .controls-right{ margin-left:auto; display:flex; gap:8px; align-items:center; }
+
+  .table-wrap{ overflow-x:auto; margin-top:4px; }
+
+  table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    min-width:700px;
+    font-size:14px;
+  }
+
+  th,td{
+    text-align:left;
+    padding:10px 12px;
+    border-bottom:1px solid #e5e7eb;
+    vertical-align:middle;
+  }
+
+  .preview-scroll thead th{
+    background:var(--table-header);
+    font-weight:800;
+    font-size:13px;
+    position:sticky;
+    top:0;
+    z-index:5;
+    box-shadow:0 2px 4px rgba(148,163,184,0.35);
+  }
+
+  tbody tr:nth-child(even){
+    background:#f9fafb;
+  }
+
+  tbody tr:hover{
+    background:#eff6ff;
+  }
+
+  .inline-error{
+    color:var(--danger);
+    font-size:12px;
+    margin-top:4px;
+    display:block;
+  }
+
+  .small-muted{ font-size:12px; color:var(--muted); }
+
+  .file-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+
+  .file-input{
+    padding:8px 10px;
+    background:#fff;
+    border-radius:10px;
+    border:1px solid var(--input-border);
+    min-width:220px;
+  }
+
+  .scroll-section {
+    max-height:260px;
+    overflow-y:auto;
+    padding-right:6px;
+  }
+
+  .preview-scroll {
+    max-height:330px;
+    overflow-y:auto;
+    padding-right:6px;
+  }
+
+  ::-webkit-scrollbar {
+    width:8px;
+    height:8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background:#cbd5f5;
+    border-radius:999px;
+  }
+  ::-webkit-scrollbar-track {
+    background:transparent;
+  }
+
+  .section-title{
+    font-size:18px;
+    font-weight:800;
+    text-align:center;
+    margin-bottom:10px;
+    color:#1f2937;
+  }
+
+  .section-title::after{
+    content:'';
+    display:block;
+    width:70px;
+    height:3px;
+    margin:6px auto 0;
+    border-radius:999px;
+    background:linear-gradient(90deg,#2563eb,#7c3aed);
+  }
+
+  @media (max-width:520px){
+    .section-title{ font-size:16px; }
+  }
+
+  /* ===== General mobile tweaks ===== */
+  @media (max-width: 600px) {
+    body {
+      font-size: 14px;
+    }
+
+    .card {
+      margin: 10px;
+      padding: 14px 12px;
+      border-radius: 12px;
+    }
+
+    .section-title {
+      font-size: 16px;
+    }
+
+    h1, h2 {
+      font-size: 18px;
+    }
+
+    .serial-badge {
+      font-size: 16px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      display: inline-flex;
+      margin-bottom: 4px;
+    }
+
+    .field {
+      margin-bottom: 6px;
+    }
+
+    .actions-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .actions-row .controls-left,
+    .actions-row .controls-right {
+      width: 100%;
+      justify-content: stretch;
+    }
+
+    .actions-row button {
+      flex: 1;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .controls-right {
+      margin-left: 0;
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      justify-content: stretch;
+    }
+
+    .controls-right button {
+      flex: 1;
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    .rows-count {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    table {
+      min-width: 100%;
+    }
+
+    .preview-scroll {
+      max-height: 340px;
+      overflow-y: auto;
+    }
+  }
+
+  /* ===== Responsive "card" table for small screens ===== */
+  @media (max-width: 600px) {
+    .responsive-table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .responsive-table thead {
+      display: none;
+    }
+
+    .responsive-table tr {
+      display: block;
+      margin-bottom: 10px;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.85);
+    }
+
+    .responsive-table td {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 13px;
+      border-bottom: 0;
+    }
+
+    .responsive-table td::before {
+      content: attr(data-label);
+      font-weight: 600;
+      margin-right: 8px;
+      white-space: nowrap;
+    }
+  }
+
+  /* Report filters grid */
+  .report-grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:10px;
+    margin-top:8px;
+  }
+
+  @media (max-width:720px){
+    .report-grid{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+  }
+
+  @media (max-width:520px){
+    .report-grid{
+      grid-template-columns:1fr;
+    }
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header><h1>Reports – Excel Preview & PDF</h1></header>
+
+    <!-- UPLOAD CARD -->
+    <section class="card" aria-labelledby="upload-title">
+      <div id="upload-title" class="section-title">
+        Upload report file
+      </div>
+
+      <div style="margin-bottom:10px" class="file-row">
+        <input id="file-input" class="file-input" type="file" accept=".xlsx,.xls,.csv" />
+        <div id="file-info" class="small-muted" style="margin-left:auto"></div>
+      </div>
+
+      <div class="small-muted">
+        Tip: Select an Excel file exported from the main app. The first sheet will be previewed and used to generate ID-wise PDF slips.
+      </div>
+    </section>
+
+    <!-- TABLE PREVIEW -->
+    <section class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+        <div class="section-title" style="margin-bottom:0;flex:1 0 100%">
+          Table preview (first sheet)
+        </div>
+        <div id="rows-count" class="small-muted rows-count" style="margin-left:10px"></div>
+      </div>
+
+      <div class="preview-scroll">
+        <div class="table-wrap">
+          <table id="data-table" class="responsive-table" role="table" aria-label="Data table">
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORT SECTION -->
+    <section class="card">
+      <div class="section-title">Generate PDF Report</div>
+
+      <div class="report-grid">
+        <div class="field">
+          <label for="report-from-id">From ID</label>
+          <input id="report-from-id" type="number" min="1" max="20" placeholder="1">
+        </div>
+        <div class="field">
+          <label for="report-to-id">To ID</label>
+          <input id="report-to-id" type="number" min="1" max="20" placeholder="20">
+        </div>
+        <div class="field">
+          <label for="report-from-date">From Date</label>
+          <input id="report-from-date" type="date">
+        </div>
+        <div class="field">
+          <label for="report-to-date">To Date</label>
+          <input id="report-to-date" type="date">
+        </div>
+      </div>
+
+      <div class="actions-row" style="margin-top:12px; justify-content:flex-end;">
+        <button id="btn-generate-report">📄 Generate PDF</button>
+      </div>
+
+      <div class="small-muted">
+        Leave fields empty to include all IDs / all dates.
+      </div>
+    </section>
+
+    <footer style="text-align:center; color:var(--muted); font-size:13px; margin-top:8px">
+      Tip: Scroll horizontally on small screens to see all columns. On mobile, rows show as cards.
+    </footer>
+  </div>
+
+  <!-- jsPDF for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- SheetJS -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+  <script>
+    // USER NAMES (same mapping as main app – used in slips)
+    const USER_NAMES = {
+      1: "నాసిన. అంకయ్య",
+      2: "నాసిన. వాసు",
+      3: "నాసిన. సంపూర్ణమ్మ",
+      4: "గెద్దే. కొండయ్య",
+      5: "కుట్టుబోయిన. వరలక్ష్మమ్మ",
+      6: "వెలినేని. సుగుణమ్మ",
+      7: "వడ్లమాని. రాఘవులు నాయుడు",
+      8: "వెలినేని. రవణమ్మ",
+      9: "వడ్లమాని. అల్లిబాబు",
+      10: "వడ్లమాని. అనిల్",
+      11: "వడ్లమాని. దొరసానమ్మ",
+      12: "కాకుటూరి. నాగేశ్వరరావు",
+      13: "చిట్టిబోయిన. వేంకటేశ్వర్లు",
+      14: "చిట్టిబోయిన. మమత",
+      15: "గిద్దలూరి. ప్రకాష్",
+      16: "కూనిశెట్టి. కళాధరరావు",
+      17: "వడ్లమాని. బుజ్జయ్య",
+      18: "N/A",
+      19: "N/A",
+      20: "N/A",
+    };
+
+    function getUserNameById(id){
+      const n = Number(id);
+      return USER_NAMES[n] || "";
+    }
+
+    // Data rows loaded from Excel
+    let rows = [];
+
+    // DOM refs
+    const fileInput  = document.getElementById('file-input');
+    const fileInfo   = document.getElementById('file-info');
+    const tableHead  = document.getElementById('table-head');
+    const tableBody  = document.getElementById('table-body');
+    const rowsCount  = document.getElementById('rows-count');
+
+    const reportFromId   = document.getElementById('report-from-id');
+    const reportToId     = document.getElementById('report-to-id');
+    const reportFromDate = document.getElementById('report-from-date');
+    const reportToDate   = document.getElementById('report-to-date');
+    const btnGenerateReport = document.getElementById('btn-generate-report');
+
+    // Helpers
+    function formatNumber(n){
+      if (!isFinite(n)) return '';
+      return (Math.round(n * 100) / 100).toFixed(2);
+    }
+
+    function isoFromDate(d){
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const dd = String(d.getDate()).padStart(2,'0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function displayDateFromISO(iso){
+      if (!iso) return '';
+      const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!m) return String(iso);
+      const day   = m[3];
+      const month = parseInt(m[2], 10);
+      const year  = m[1].slice(-2);
+      const MONTH_SHORT = [
+        'Jan','Feb','Mar','Apr','May','Jun',
+        'Jul','Aug','Sep','Oct','Nov','Dec'
+      ];
+      const monName = MONTH_SHORT[month - 1] || m[2];
+      return `${day}-${monName}-${year}`;
+    }
+
+    function parseDateToISO(value){
+      if (value instanceof Date && !isNaN(value)) return isoFromDate(value);
+      if (typeof value === 'number') {
+        const epoch = new Date(Date.UTC(1899,11,30));
+        const d = new Date(epoch.getTime() + value * 24*60*60*1000);
+        if (!isNaN(d)) return isoFromDate(d);
+      }
+      const s = String(value||'').trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      const parsed = Date.parse(s);
+      if (!isNaN(parsed)) return isoFromDate(new Date(parsed));
+      const m = s.match(/^(\d{1,2})[\/\-\.\s](\d{1,2})[\/\-\.\s](\d{2,4})$/);
+      if (m){
+        let dd = Number(m[1]), mm = Number(m[2]), yy = Number(m[3]);
+        if (yy < 100) yy += 2000;
+        const d = new Date(yy, mm-1, dd);
+        if (!isNaN(d)) return isoFromDate(d);
+      }
+      return s;
+    }
+
+    function mapHeaders(headerRow){
+      const map = {};
+      headerRow.forEach((h, idx) => {
+        if (h == null) return;
+        const key = String(h).trim().toLowerCase();
+        if (!key) return;
+        if (['date','day'].includes(key)) map[idx] = 'date';
+        else if (['session','am/pm','am-pm','ampm'].includes(key)) map[idx] = 'session';
+        else if (['user id','userid','user_id','id','identifier','ident','no','number'].includes(key)) map[idx] = 'id';
+        else if (['quantity','qty','q'].includes(key)) map[idx] = 'quantity';
+        else if (['percentage','pct','percent','%'].includes(key)) map[idx] = 'percentage';
+        else if (['amount','amt','value','total'].includes(key)) map[idx] = 'amount';
+        else {
+          if (key.includes('date')) map[idx]='date';
+          else if (key.includes('session')) map[idx]='session';
+          else if (key.includes('user') && key.includes('id')) map[idx]='id';
+          else if (key.includes('id')) map[idx]='id';
+          else if (key.includes('qty')||key.includes('quant')) map[idx]='quantity';
+          else if (key.includes('pct')||key.includes('percent')||key.includes('%')) map[idx]='percentage';
+          else if (key.includes('amt')||key.includes('amount')) map[idx]='amount';
+        }
+      });
+      return map;
+    }
+
+    // Load Excel into rows[]
+    function loadWorkbookFileToTable(file){
+      if (!file) return;
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const data = e.target.result;
+        let workbook;
+        try {
+          workbook = XLSX.read(data, { type:'array', cellDates:true, dateNF:'yyyy-mm-dd' });
+        } catch(err){
+          alert('Failed to read file: '+err);
+          return;
+        }
+        const firstSheet = workbook.SheetNames[0];
+        const ws = workbook.Sheets[firstSheet];
+        if (!ws) { alert('No sheets found'); return; }
+
+        const aoa = XLSX.utils.sheet_to_json(ws, { header:1, defval:null, raw:false, dateNF:'yyyy-mm-dd' });
+        if (aoa.length === 0) { alert('Sheet empty'); return; }
+
+        const header = aoa[0].map(h => h===null ? '' : String(h));
+        let mapping = mapHeaders(header);
+
+        if (!Object.values(mapping).includes('date') && aoa.length>1 && aoa[0].length>=4) {
+          mapping = {0:'date',1:'session',2:'id',3:'quantity',4:'percentage'};
+          if (aoa[0].length>=6) mapping[5]='amount';
+        }
+
+        const extracted = [];
+
+        for (let r=1; r<aoa.length; r++){
+          const row = aoa[r];
+          if (!row || row.every(c=>c===null||c==='')) continue;
+          const obj = {};
+          for (let c=0; c<row.length; c++){
+            const field = mapping[c]; if (!field) continue;
+            const cell = row[c];
+            if (field==='date'){
+              obj.date = parseDateToISO(cell);
+            } else if (field==='session'){
+              if (cell == null) obj.session = '';
+              else {
+                let s = String(cell).trim().toUpperCase();
+                if (s === 'A.M.') s = 'AM';
+                if (s === 'P.M.') s = 'PM';
+                obj.session = s;
+              }
+            } else if (field==='id'){
+              const n = (cell===null)?null:Number(cell);
+              obj.id = Number.isFinite(n)?Math.trunc(n):(cell!==null?String(cell).trim():null);
+            } else if (field==='quantity'){
+              const n=(cell===null)?null:Number(cell);
+              obj.quantity = Number.isFinite(n)?n:(cell!==null?Number(String(cell).replace(/,/g,'')):null);
+            } else if (field==='percentage'){
+              const raw = cell; let n=null;
+              if (raw!==null){
+                const s = String(raw).replace('%','').replace(/,/g,'').trim();
+                n = Number(s);
+              }
+              obj.percentage = Number.isFinite(n)?n:null;
+            } else if (field==='amount'){
+              const n=(cell===null)?null:Number(cell);
+              obj.amount = Number.isFinite(n)?n:null;
+            }
+          }
+
+          // compute amount if missing
+          if ((obj.amount===null||obj.amount===undefined||obj.amount==='') &&
+              obj.quantity!=null && obj.percentage!=null){
+            const qn = Number(obj.quantity);
+            const pn = Number(obj.percentage);
+            const amt = (isFinite(qn) && isFinite(pn)) ? Number((qn * pn * 7.5).toFixed(2)) : null;
+            obj.amount = amt;
+          }
+
+          extracted.push({
+            date: obj.date || '',
+            session: obj.session || '',
+            id: Number(obj.id),
+            quantity: Number(obj.quantity) || 0,
+            percentage: Number(obj.percentage) || 0,
+            amount: Number(obj.amount) || 0
+          });
+        }
+
+        rows = extracted;
+        renderTable();
+
+        const msgRows = rows.length;
+        fileInfo.textContent = `Loaded: ${file.name} — ${msgRows} row${msgRows === 1 ? '' : 's'}.`;
+
+        fileInput.value = '';
+      };
+
+      reader.onerror = (err) => {
+        alert('File read error: ' + err);
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    // Render table from rows[]
+    function renderTable(){
+      tableHead.innerHTML = '';
+      tableBody.innerHTML = '';
+
+      if (!rows || rows.length === 0){
+        rowsCount.textContent = '0 rows';
+        return;
+      }
+
+      const headRow = document.createElement('tr');
+      ['S.No','Date','Session','User ID','Quantity','Percentage','Amount'].forEach(h => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        headRow.appendChild(th);
+      });
+      tableHead.appendChild(headRow);
+
+      rows.forEach((r, idx) => {
+        const tr = document.createElement('tr');
+
+        const tdSerial = document.createElement('td');
+        tdSerial.textContent = idx + 1;
+        tdSerial.setAttribute('data-label','S.No');
+        tr.appendChild(tdSerial);
+
+        const tdDate = document.createElement('td');
+        tdDate.textContent = displayDateFromISO(r.date);
+        tdDate.setAttribute('data-label','Date');
+        tr.appendChild(tdDate);
+
+        const tdSess = document.createElement('td');
+        tdSess.textContent = r.session;
+        tdSess.setAttribute('data-label','Session');
+        tr.appendChild(tdSess);
+
+        const tdId = document.createElement('td');
+        tdId.textContent = r.id;
+        tdId.setAttribute('data-label','User ID');
+        tr.appendChild(tdId);
+
+        const tdQty = document.createElement('td');
+        tdQty.textContent = formatNumber(r.quantity);
+        tdQty.setAttribute('data-label','Quantity');
+        tr.appendChild(tdQty);
+
+        const tdPct = document.createElement('td');
+        tdPct.textContent = formatNumber(r.percentage);
+        tdPct.setAttribute('data-label','Percentage');
+        tr.appendChild(tdPct);
+
+        const tdAmt = document.createElement('td');
+        tdAmt.textContent = formatNumber(r.amount);
+        tdAmt.setAttribute('data-label','Amount');
+        tr.appendChild(tdAmt);
+
+        tableBody.appendChild(tr);
+      });
+
+      rowsCount.textContent = `${rows.length} row${rows.length === 1 ? '' : 's'}`;
+    }
+
+    // ===== PDF generation (ID-wise slips) =====
+    function generatePdfReport(data, filters){
+      if (!window.jspdf || !window.jspdf.jsPDF){
+        alert('PDF library not loaded.');
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageWidth  = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      const margin = 6;
+      const cardsPerRow = 2;
+      const cardsPerCol = 2;
+      const cardsPerPage = cardsPerRow * cardsPerCol;
+
+      const cardWidth  = (pageWidth  - margin * 2) / cardsPerRow;
+      const cardHeight = (pageHeight - margin * 2) / cardsPerCol;
+
+      doc.setLineWidth(0.2);
+      doc.setLineDash([1, 1], 0);
+      doc.line(pageWidth / 2, margin, pageWidth / 2, pageHeight - margin);
+      doc.line(margin, pageHeight / 2, pageWidth - margin, pageHeight / 2);
+      doc.setLineDash([]);
+
+      const grouped = {};
+      data.forEach(row => {
+        const id = row.id;
+        if (!grouped[id]) grouped[id] = [];
+        grouped[id].push(row);
+      });
+
+      const ids = Object.keys(grouped)
+        .map(Number)
+        .sort((a, b) => a - b);
+
+      ids.forEach((id, index) => {
+        if (index > 0 && index % cardsPerPage === 0) {
+          doc.addPage();
+          doc.setLineWidth(0.2);
+          doc.setLineDash([1, 1], 0);
+          doc.line(pageWidth / 2, margin, pageWidth / 2, pageHeight - margin);
+          doc.line(margin, pageHeight / 2, pageWidth - margin, pageHeight / 2);
+          doc.setLineDash([]);
+        }
+
+        const cardIndexOnPage = index % cardsPerPage;
+        const colIndex = cardIndexOnPage % cardsPerRow;
+        const rowIndex = Math.floor(cardIndexOnPage / cardsPerRow);
+
+        const x0 = margin + colIndex * cardWidth;
+        const y0 = margin + rowIndex * cardHeight;
+
+        const idRows = grouped[id].slice();
+        idRows.sort((a, b) => {
+          if (a.date < b.date) return -1;
+          if (a.date > b.date) return 1;
+          if (a.session < b.session) return -1;
+          if (a.session > b.session) return 1;
+          return 0;
+        });
+
+        drawIdCard(doc, x0, y0, cardWidth, cardHeight, id, idRows, filters);
+      });
+
+      doc.save('report.pdf');
+    }
+
+    function drawIdCard(doc, x, y, w, h, id, idRows, filters){
+      const padding = 3;
+
+      doc.setLineWidth(0.4);
+      doc.rect(x, y, w, h);
+
+      const headerHeight = 16;
+      const footerHeight = 18;
+
+      const tableTopY    = y + headerHeight;
+      const tableBottomY = y + h - footerHeight;
+
+      const name = getUserNameById(id) || '';
+      const allDates = idRows.map(r => r.date).sort();
+      const minDate = filters.fromDate || (allDates[0] || '');
+      const maxDate = filters.toDate   || (allDates[allDates.length - 1] || '');
+
+      doc.setFontSize(9);
+      doc.text(`ID: ${id}`, x + padding, y + 5);
+
+      if (minDate){
+        doc.text(`From: ${displayDateFromISO(minDate)}`, x + w / 2, y + 5, { align: 'center' });
+      }
+      if (maxDate){
+        doc.text(`To: ${displayDateFromISO(maxDate)}`, x + w - padding, y + 5, { align: 'right' });
+      }
+
+      doc.setFontSize(11);
+      doc.text(name || '—', x + w / 2, y + 11, { align: 'center' });
+
+      doc.line(x, y + headerHeight, x + w, y + headerHeight);
+
+      const rowsCount = 15;
+      const headerRowHeight = 6;
+
+      const innerX  = x + padding;
+      const innerW  = w - padding * 2;
+
+      const colW_sno = 8;
+      const colW_qty = 18;
+      const colW_pct = 18;
+      const colW_amt = innerW - (colW_sno + colW_qty + colW_pct);
+
+      const colX0 = innerX;
+      const colX1 = colX0 + colW_sno;
+      const colX2 = colX1 + colW_qty;
+      const colX3 = colX2 + colW_pct;
+      const colX4 = colX3 + colW_amt;
+
+      const cSno = (colX0 + colX1) / 2;
+      const cQty = (colX1 + colX2) / 2;
+      const cPct = (colX2 + colX3) / 2;
+      const cAmt = (colX3 + colX4) / 2;
+
+      const tableHeaderY = tableTopY + 4;
+
+      doc.setFontSize(8);
+      doc.text('Sl',  cSno, tableHeaderY, { align: 'center' });
+      doc.text('Qty', cQty, tableHeaderY, { align: 'center' });
+      doc.text('%',   cPct, tableHeaderY, { align: 'center' });
+      doc.text('Amt', cAmt, tableHeaderY, { align: 'center' });
+
+      doc.setLineWidth(0.2);
+      doc.rect(innerX, tableTopY, innerW, tableBottomY - tableTopY);
+
+      [colX1, colX2, colX3].forEach(vx => {
+        doc.line(vx, tableTopY, vx, tableBottomY);
+      });
+
+      const firstRowTop = tableTopY + headerRowHeight;
+      doc.line(innerX, firstRowTop, innerX + innerW, firstRowTop);
+
+      const usableHeight = (tableBottomY - firstRowTop);
+      const rowHeight = usableHeight / rowsCount;
+
+      let currentY = firstRowTop;
+      let totalQty = 0;
+      let totalAmt = 0;
+
+      for (let i = 0; i < rowsCount; i++) {
+        const rowData = idRows[i];
+        const yMid = currentY + rowHeight * 0.7;
+
+        if (rowData){
+          totalQty += Number(rowData.quantity) || 0;
+          totalAmt += Number(rowData.amount)   || 0;
+
+          doc.text(String(i + 1), cSno, yMid, { align: 'center' });
+          doc.text(formatNumber(rowData.quantity),   cQty, yMid, { align: 'center' });
+          doc.text(formatNumber(rowData.percentage), cPct, yMid, { align: 'center' });
+          doc.text(formatNumber(rowData.amount),     cAmt, yMid, { align: 'center' });
+        } else {
+          doc.text(String(i + 1), cSno, yMid, { align: 'center' });
+        }
+
+        currentY += rowHeight;
+        doc.line(innerX, currentY, innerX + innerW, currentY);
+      }
+
+      const footerTopY = tableBottomY;
+      doc.setLineWidth(0.3);
+      doc.line(x, footerTopY, x + w, footerTopY);
+
+      doc.setFontSize(8.5);
+
+      const footerInnerY1 = footerTopY + 5.5;
+      const footerInnerY2 = footerTopY + 11;
+
+      const footerLabelX = x + padding;
+      const footerValueX = x + w - padding;
+
+      doc.text('Total Qty', footerLabelX, footerInnerY1);
+      doc.text('Total Amt', footerLabelX, footerInnerY2);
+
+      doc.text(formatNumber(totalQty), footerValueX, footerInnerY1, { align: 'right' });
+      doc.text(formatNumber(totalAmt), footerValueX, footerInnerY2, { align: 'right' });
+    }
+
+    // ========= EVENTS =========
+    fileInput.addEventListener('change', (evt) => {
+      const f = evt.target.files && evt.target.files[0];
+      if (!f) return;
+      loadWorkbookFileToTable(f);
+    });
+
+    document.addEventListener('dragover', (e) => e.preventDefault());
+    document.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) loadWorkbookFileToTable(f);
+    });
+
+    btnGenerateReport.addEventListener('click', () => {
+      if (!rows.length){
+        alert('No data loaded. Please upload a file first.');
+        return;
+      }
+
+      const fromIdStr = reportFromId.value.trim();
+      const toIdStr   = reportToId.value.trim();
+      const fromDate  = reportFromDate.value;
+      const toDate    = reportToDate.value;
+
+      const idMin = fromIdStr ? Number(fromIdStr) : null;
+      const idMax = toIdStr   ? Number(toIdStr)   : null;
+
+      if ((fromIdStr && isNaN(idMin)) || (toIdStr && isNaN(idMax))){
+        alert('From ID and To ID must be numbers.');
+        return;
+      }
+      if (idMin !== null && idMax !== null && idMin > idMax){
+        alert('From ID cannot be greater than To ID.');
+        return;
+      }
+
+      const dateMin = fromDate || '0000-01-01';
+      const dateMax = toDate   || '9999-12-31';
+
+      if (fromDate && toDate && dateMin > dateMax){
+        alert('From Date cannot be after To Date.');
+        return;
+      }
+
+      const filtered = rows.filter(r => {
+        const idOk = (idMin === null && idMax === null)
+          ? true
+          : ((idMin === null || r.id >= idMin) && (idMax === null || r.id <= idMax));
+
+        const dateOk = (!fromDate && !toDate)
+          ? true
+          : (r.date >= dateMin && r.date <= dateMax);
+
+        return idOk && dateOk;
+      });
+
+      if (!filtered.length){
+        alert('No rows found for the selected filters.');
+        return;
+      }
+
+      generatePdfReport(filtered, {
+        idMin,
+        idMax,
+        fromDate,
+        toDate
+      });
+
+      // reset filters after successful PDF
+      reportFromId.value = '';
+      reportToId.value = '';
+      reportFromDate.value = '';
+      reportToDate.value = '';
+    });
+
+    // initial empty table
+    renderTable();
+  </script>
+</body>
+</html>
